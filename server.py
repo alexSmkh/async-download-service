@@ -1,9 +1,17 @@
 import os
 from pathlib import Path
+import logging
 
 from aiohttp import web
 import aiofiles
 import asyncio
+
+
+logger = logging.getLogger(__file__)
+
+
+def log_info(info):
+    logging.info(info, exc_info=True)
 
 
 async def archive(request):
@@ -30,6 +38,7 @@ async def archive(request):
     while True:
         if not proc.stdout.at_eof():
             chunk_content = await proc.stdout.read(chunk_size_in_bytes)
+            log_info('Sending archive chunk ...')
             await response.write(chunk_content)
             continue
         break
@@ -44,6 +53,7 @@ async def handle_index_page(request):
 
 
 if __name__ == '__main__':
+    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
     app = web.Application()
     app.add_routes([
         web.get('/', handle_index_page),
