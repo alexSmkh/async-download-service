@@ -11,6 +11,11 @@ async def archive(request):
     response.headers['Content-Type'] = 'application/octet-stream'
     response.headers['Content-Disposition'] = 'attachment; filename="photos.zip"'
     archive_hash = request.match_info.get('archive_hash')
+    root_path = Path(__file__).parent.resolve()
+    photos_root_path = os.path.join(root_path, 'test_photos')
+
+    if archive_hash is None or not os.path.exists(os.path.join(photos_root_path, archive_hash)):
+        return web.HTTPNotFound(body='Архив не существует или был удален')
 
     await response.prepare(request)
 
