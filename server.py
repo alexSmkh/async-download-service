@@ -10,10 +10,6 @@ import asyncio
 logger = logging.getLogger(__file__)
 
 
-def log_info(info):
-    logging.info(info, exc_info=True)
-
-
 async def archive(request):
     response = web.StreamResponse()
     response.headers['Content-Type'] = 'application/octet-stream'
@@ -23,7 +19,7 @@ async def archive(request):
     photos_root_path = os.path.join(root_path, 'test_photos')
 
     if archive_hash is None or not os.path.exists(os.path.join(photos_root_path, archive_hash)):
-        return web.HTTPNotFound(body='Архив не существует или был удален')
+        return web.HTTPNotFound(body='The archive does not exist or has been deleted')
 
     await response.prepare(request)
 
@@ -35,13 +31,20 @@ async def archive(request):
     )
 
     chunk_size_in_bytes = 100000
-    while True:
-        if not proc.stdout.at_eof():
+    try:
+        while True:
+            if proc.stdout.at_eof():
+                break
             chunk_content = await proc.stdout.read(chunk_size_in_bytes)
-            log_info('Sending archive chunk ...')
+            logging.info('Sending archive chunk ...')
             await response.write(chunk_content)
-            continue
-        break
+
+    except (asyncio.CancelledError, web.HTTPRequestTimeout):
+        logging.info(f'The download was interrupted')
+        raise
+    finally:
+        proc.kill()
+        await proc.communicate()
 
     return response
 
