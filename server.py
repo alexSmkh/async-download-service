@@ -19,7 +19,7 @@ async def archive(request, response_delay, file_folder_path):
     root_path = Path(__file__).parent.resolve()
     photos_root_path = os.path.join(root_path, file_folder_path)
 
-    if archive_hash is None or not os.path.exists(os.path.join(photos_root_path, archive_hash)):
+    if not os.path.exists(os.path.join(photos_root_path, archive_hash)):
         return web.HTTPNotFound(body='The archive does not exist or has been deleted')
 
     await response.prepare(request)
