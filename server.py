@@ -47,8 +47,9 @@ async def archive(request, response_delay, file_folder_path):
         logging.info(f'The download was interrupted')
         raise
     finally:
-        proc.kill()
-        await proc.communicate()
+        if proc.returncode is None:
+            proc.kill()
+            await proc.communicate()
 
     return response
 
