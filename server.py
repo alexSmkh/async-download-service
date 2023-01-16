@@ -15,7 +15,7 @@ async def archive(request, response_delay, file_folder_path):
     response = web.StreamResponse()
     response.headers['Content-Type'] = 'application/octet-stream'
     response.headers['Content-Disposition'] = 'attachment; filename="photos.zip"'
-    archive_hash = request.match_info.get('archive_hash')
+    archive_hash = request.match_info['archive_hash']
     root_path = Path(__file__).parent.resolve()
     photos_root_path = os.path.join(root_path, file_folder_path)
 
